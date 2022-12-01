@@ -50,7 +50,7 @@ RUN \
     if [ -d /tmp/trust ]; then  \
         ind=$(printf ' %.0s' {1..16}) \
         CERTS=$(for f in /tmp/trust/*; do echo "$ind\"$f\","; done) && \
-        (IFS=$"\n"; echo -e ${CERTS:0:${#CERTS}-1})                          >> $POLICY && \
+        (IFS=$"\n"; echo -e ${CERTS:0:${#CERTS}-1})                          >> $POLICY; \
     fi && \
 
     echo -e '            ]'                                                  >> $POLICY && \
