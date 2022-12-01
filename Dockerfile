@@ -10,11 +10,13 @@ RUN dnf install -y \
     firefox
 
 # Install Certificates for System
-RUN cp -r /mnt/trustanchors /tmp/trust
 
-RUN cp /tmp/trust/* /etc/pki/ca-trust/source/anchors/
-
-RUN update-ca-trust
+RUN \
+    if [ -d /mnt/trustanchors ]; then \
+        cp -r /mnt/trustanchors /tmp/trust \
+        cp /tmp/trust/* /etc/pki/ca-trust/source/anchors/ \
+        update-ca-trust; \
+    fi
 
 # Create Firefox Policy
 ARG HOMEPAGES=https://www.redhat.com
@@ -45,9 +47,11 @@ RUN \
     echo -e '        "Certificates": {'                                      >> $POLICY && \
     echo -e '            "Install": ['                                       >> $POLICY && \
 
-    ind=$(printf ' %.0s' {1..16}) \
-    CERTS=$(for f in /tmp/trust/*; do echo "$ind\"$f\","; done) && \
-    (IFS=$"\n"; echo -e ${CERTS:0:${#CERTS}-1})                              >> $POLICY && \
+    if [ -d /tmp/trust ]; then  \
+        ind=$(printf ' %.0s' {1..16}) \
+        CERTS=$(for f in /tmp/trust/*; do echo "$ind\"$f\","; done) && \
+        (IFS=$"\n"; echo -e ${CERTS:0:${#CERTS}-1})                          >> $POLICY && \
+    fi && \
 
     echo -e '            ]'                                                  >> $POLICY && \
     echo -e '        }'                                                      >> $POLICY && \
