@@ -1,0 +1,36 @@
+name: OCI Image CI
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 */7 * ?'
+
+jobs:
+  build:
+    name: Build and push image
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Image
+      id: build-image
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: firefox
+        tags: latest ${{ github.sha }}
+        containerfiles: |
+          ./Dockerfile
+
+    - name: Push To quay.io
+      id: push-to-quay
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build-image.outputs.image }}
+        tags: ${{ steps.build-image.outputs.tags }}
+        registry: quay.io/rh_ee_bgrossew
+        username: ${{ secrets.QUAY_IO_ROBOT }}
+        password: ${{ secrets.QUAY_IO_SECRET }}
+
+    - name: Print image url
+      run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
