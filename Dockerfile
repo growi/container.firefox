@@ -78,7 +78,7 @@ RUN \
 RUN cat $POLICY
 
 #Configure Entrypoint 
-ENTRYPOINT ["firefox"]
+ENTRYPOINT ["firefox", "--new-instance"]
 
 #Example 'podman build' Command
 # podman build . -v ~/trustanchors:/mnt/trustanchors:ro,z --build-arg HOMEPAGES="https://www.redhat.com https://www.google.com" -t firefox
