@@ -12,14 +12,15 @@ RUN dnf install -y \
 # Install Certificates for System
 
 RUN \
-    if [ -d /mnt/trustanchors ]; then \
-        cp -r /mnt/trustanchors /tmp/trust \
-        cp /tmp/trust/* /etc/pki/ca-trust/source/anchors/ \
+    files=$(shopt -s nullglob dotglob; echo /mnt/trustanchors/*) && \
+    if (( ${#files} )); then \
+        cp -r /mnt/trustanchors /tmp/trust && \
+        cp -r /tmp/trust/. /etc/pki/ca-trust/source/anchors/ && \
         update-ca-trust; \
     fi
 
 # Create Firefox Policy
-ARG HOMEPAGES=https://www.redhat.com
+ARG HOMEPAGES=about:home
 ARG POLICY=/usr/lib64/firefox/distribution/policies.json
 
 RUN \
@@ -73,9 +74,8 @@ RUN \
     # Disable User specific Policy Overrides
     echo -e '//Enable policies.json'                              > /usr/lib64/firefox/firefox.cfg && \
     echo -e 'lockPref("browser.policies.perUserDir", false);'    >> /usr/lib64/firefox/firefox.cfg && \
-    cat /usr/lib64/firefox/firefox.cfg
-
-RUN cat $POLICY
+    cat /usr/lib64/firefox/firefox.cfg && \
+    cat $POLICY
 
 #Configure Entrypoint 
 ENTRYPOINT ["firefox", "--new-instance"]
