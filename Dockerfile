@@ -1,5 +1,5 @@
 # Prepare Base Image
-FROM fedora:latest AS base
+FROM fedora:37 AS base
 
 RUN dnf update -y
 
