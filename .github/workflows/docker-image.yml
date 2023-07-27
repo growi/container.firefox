@@ -21,6 +21,7 @@ jobs:
         tags: latest ${{ github.sha }}
         containerfiles: |
           ./Dockerfile
+        extra-args: squash 
 
     - name: Push To quay.io
       id: push-to-quay
